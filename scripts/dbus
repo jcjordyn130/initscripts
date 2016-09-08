@@ -1,0 +1,21 @@
+#!/bin/sh
+case "$1" in
+start)
+   if command -v dbus-daemon >/dev/null
+   then
+   mkdir -p /run/dbus
+   dbus-uuidgen --ensure &&
+   dbus-daemon --system
+ else
+   echo "D-Bus isn't installed."
+   fi
+   ;;
+stop)
+   killall dbus-launch
+   killall dbus-daemon
+   rm /run/dbus/pid
+   ;;
+poll)
+   test -e /run/dbus/pid
+   ;;
+esac

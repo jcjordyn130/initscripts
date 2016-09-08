@@ -1,0 +1,12 @@
+#!/bin/sh
+case "$1" in
+start)
+   /usr/bin/setsid /usr/bin/lightdm
+   ;;
+stop)
+   killall lightdm
+   ;;
+poll)
+   pgrep lightdm >/dev/null
+   ;;
+esac

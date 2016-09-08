@@ -1,0 +1,31 @@
+#!/bin/bash
+# init script installed for init
+# GPLv3 The Linux Geek
+
+if [ -e /etc/init.d ]
+then
+echo "init.d does not exist."
+echo "Either init isn't installed or is not installed right."
+exit 1
+fi
+
+if [ ! -e /sbin/rc ]
+then
+echo "Init is not installed."
+echo "You have to have it installed to use this script."
+exit 1
+fi
+
+if [ "$1" == "list" ]
+then
+for file in scripts/*
+do
+script=$(echo "$file" | sed "s/.*\///" | sed "s/\..*//")
+if [ -e "/etc/init.d/$script" ]
+then
+echo "[X] $script"
+else
+echo "[ ] $script"
+fi
+done
+fi
