@@ -1,14 +1,22 @@
 #!/bin/bash
-# init script installed for init
+# init script manager for init
 # GPLv3 The Linux Geek
 
-if [ -e /etc/init.d ]
+# Root check
+if [ "$(id -u)" != "0" ]; then
+echo "Must be root".
+exit 1
+fi
+
+# Check to see if init.d exists
+if [ ! -e /etc/init.d ]
 then
 echo "init.d does not exist."
 echo "Either init isn't installed or is not installed right."
 exit 1
 fi
 
+# Check to see if init is installed/ if /sbin/rc exists
 if [ ! -e /sbin/rc ]
 then
 echo "Init is not installed."
@@ -16,16 +24,67 @@ echo "You have to have it installed to use this script."
 exit 1
 fi
 
+if [ "$1" == "" ]; then
+echo "Name something for me to do."
+echo "Hint: run $0 --help for help"
+exit 1
+fi
+
+if [ "$1" == "--help" ]; then
+echo "$0 [--version] [--help]"
+echo "list - Lists the avalible initscripts"
+echo "install [name of initscript] - Installes a initscript"
+echo "uninstall [name of initscript] - Removes a initscript"
+exit 0
+fi
+
 if [ "$1" == "list" ]
 then
+echo "I = Installed"
+echo "NI = Not Installed"
+echo ""
 for file in scripts/*
 do
 script=$(echo "$file" | sed "s/.*\///" | sed "s/\..*//")
 if [ -e "/etc/init.d/$script" ]
 then
-echo "[X] $script"
+echo "[I] $script"
 else
-echo "[ ] $script"
+echo "[NI] $script"
 fi
 done
+fi
+
+if [ "$1" == "install" ]; then
+# Invalid initscript check
+if [ "$2" == "" ]; then
+echo "Please specify a initscript to install."
+exit 1
+fi
+# Check to see if the initscript exists
+if [ ! -e "scripts/$2" ]; then
+echo "That initscript does not exist"
+exit 1
+fi
+# Check to see if initscript is already installed
+if [ -e "/etc/init.d/$2" ]
+then
+echo "That initscript is already installed"
+exit 1
+fi
+# If the checks don't fail then install the init script
+echo "Installing "$2" to /etc/init.d"
+cp scripts/"$2" /etc/init.d/"$2"
+fi
+
+if [ "$1" = "uninstall" ]; then
+# Check to see if the initscript is installed, if not then exit.
+if [ ! -e /etc/init.d/$2 ]; then
+echo "That initscript is not installed"
+exit 1
+fi
+# Remove the initscript
+echo "Removing $2 from /etc/init.d"
+rm /etc/init.d/$2
+exit $?
 fi
